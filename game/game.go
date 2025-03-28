@@ -2,16 +2,17 @@ package game
 
 import "fmt"
 
-type Game uint32
+// Dimension defines the size of the tic-tac-toe board (Dimension x Dimension)
+const Dimension = 3
 
-// Game type is a 32-bit unsigned integer that represents the game state.
-//
-// 0000000000000 0 00 00 00 00 00 00 00 00 00
-//                                   ^^ ^^ ^^ Row 1
-//                          ^^ ^^ ^^ Row 2
-//                 ^^ ^^ ^^ Row 3
-//               ^ Bool player turn
-// ^^^^^^^^^^^^^ Leftover bits
+type Game uint64
+
+// Example of the game board representation for a 3x3 board:
+// 000000000000000000000000000000000000000000000 0 00 00 00 00 00 00 00 00 00
+//                                                                   ^^ ^^ ^^ Row 1
+//                                                          ^^ ^^ ^^ Row 2
+//                                                 ^^ ^^ ^^ Row 3
+//                                               ^ Bool player turn
 
 type Player uint8
 
@@ -25,68 +26,101 @@ func NewGame() *Game {
 	return new(Game)
 }
 
-func allEqual[T comparable](items ...T) bool {
-	for i := 1; i < len(items); i++ {
-		if items[i] != items[0] {
-			return false
-		}
-	}
-	return true
-}
-
 func (g *Game) Winner() Player {
 	// Check rows
-	for i := range 3 {
-		x, _ := g.Get(0, i)
-		y, _ := g.Get(1, i)
-		z, _ := g.Get(2, i)
-		if allEqual(x, y, z) && x != Empty {
-			return x
+	for i := 0; i < Dimension; i++ {
+		firstPos, _ := g.Get(0, i)
+		if firstPos == Empty {
+			continue
+		}
+
+		win := true
+		for j := 1; j < Dimension; j++ {
+			pos, _ := g.Get(j, i)
+			if pos != firstPos {
+				win = false
+				break
+			}
+		}
+
+		if win {
+			return firstPos
 		}
 	}
 
 	// Check columns
-	for i := range 3 {
-		x, _ := g.Get(i, 0)
-		y, _ := g.Get(i, 1)
-		z, _ := g.Get(i, 2)
-		if allEqual(x, y, z) && x != Empty {
-			return x
+	for i := 0; i < Dimension; i++ {
+		firstPos, _ := g.Get(i, 0)
+		if firstPos == Empty {
+			continue
+		}
+
+		win := true
+		for j := 1; j < Dimension; j++ {
+			pos, _ := g.Get(i, j)
+			if pos != firstPos {
+				win = false
+				break
+			}
+		}
+
+		if win {
+			return firstPos
 		}
 	}
 
-	// Check diagonals
-	x, _ := g.Get(0, 0)
-	y, _ := g.Get(1, 1)
-	z, _ := g.Get(2, 2)
-	if allEqual(x, y, z) && x != Empty {
-		return x
+	// Check main diagonal (top-left to bottom-right)
+	firstPos, _ := g.Get(0, 0)
+	if firstPos != Empty {
+		win := true
+		for i := 1; i < Dimension; i++ {
+			pos, _ := g.Get(i, i)
+			if pos != firstPos {
+				win = false
+				break
+			}
+		}
+
+		if win {
+			return firstPos
+		}
 	}
-	x, _ = g.Get(0, 2)
-	y, _ = g.Get(1, 1)
-	z, _ = g.Get(2, 0)
-	if allEqual(x, y, z) && x != Empty {
-		return x
+
+	// Check other diagonal (top-right to bottom-left)
+	firstPos, _ = g.Get(0, Dimension-1)
+	if firstPos != Empty {
+		win := true
+		for i := 1; i < Dimension; i++ {
+			pos, _ := g.Get(i, Dimension-1-i)
+			if pos != firstPos {
+				win = false
+				break
+			}
+		}
+
+		if win {
+			return firstPos
+		}
 	}
 
 	return Empty
 }
 
 func (g *Game) Player() Player {
-	// Reads the 19th bit of the game state to determine the player
-	return Player((*g>>18)&1) + 1
+	// Reads the bit after the board representation to determine the player
+	return Player((*g>>(uint(Dimension*Dimension*2)))&1) + 1
 }
 
 func (g *Game) TogglePlayer() {
-	// Toggles the 19th bit of the game state to switch players
-	*g ^= 1 << 18
+	// Toggles the bit after the board representation to switch players
+	*g ^= 1 << (uint(Dimension * Dimension * 2))
 }
 
 func (g *Game) Get(x, y int) (Player, error) {
-	if 0 > x || x > 2 || 0 > y || y > 2 {
+	if 0 > x || x >= Dimension || 0 > y || y >= Dimension {
 		return Empty, InvalidCoordinate
 	}
-	return Player((*g >> uint((x*3+y)*2)) & 3), nil
+	return Player((*g >> uint((x*Dimension+y)*2)) & 3), nil
 }
 
 func (g *Game) validMove(x, y int) bool {
@@ -95,12 +129,12 @@ func (g *Game) validMove(x, y int) bool {
 }
 
 func (g *Game) Set(x, y int, p Player) error {
-	if 0 > x || x > 2 || 0 > y || y > 2 {
+	if 0 > x || x >= Dimension || 0 > y || y >= Dimension {
 		return InvalidCoordinate
 	} else if !g.validMove(x, y) {
 		return InvalidMove
 	}
-	*g = (*g &^ Game(3<<(uint(x*3+y)*2))) | Game(p)<<(uint(x*3+y)*2)
+	*g = (*g &^ Game(3<<(uint(x*Dimension+y)*2))) | Game(p)<<(uint(x*Dimension+y)*2)
 	return nil
 }
 
@@ -118,13 +152,27 @@ func (p Player) String() string {
 func (g Game) String() string {
 	var s string
 
-	for i := range 3 {
-		x, _ := g.Get(i, 0)
-		y, _ := g.Get(i, 1)
-		z, _ := g.Get(i, 2)
-		s += fmt.Sprintf(" %s | %s | %s\n", x, y, z)
-		if i < 2 {
-			s += fmt.Sprintf("---+---+---\n")
+	for i := 0; i < Dimension; i++ {
+		for j := 0; j < Dimension; j++ {
+			p, _ := g.Get(j, i)
+			s += fmt.Sprintf(" %s ", p)
+			if j < Dimension-1 {
+				s += "|"
+			}
+		}
+		if i < Dimension-1 {
+			s += "\n"
+		}
+		if i < Dimension-1 {
+			for j := 0; j < Dimension; j++ {
+				s += "---"
+				if j < Dimension-1 {
+					s += "+"
+				}
+			}
+			if i < Dimension-1 {
+				s += "\n"
+			}
 		}
 	}
 	return s
