@@ -25,10 +25,10 @@ const (
 )
 
 func NewGame(dimension uint64) *Game {
-	dimension -= 2
-	if dimension > 3 {
+	if 2 > dimension || dimension > 5 {
 		return nil
 	}
+	dimension -= 2
 	// Store dimension in bits 1-2 (bit 0 is for player turn)
 	o := Game(dimension << 1)
 	return &o

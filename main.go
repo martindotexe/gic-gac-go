@@ -6,7 +6,11 @@ import (
 )
 
 func main() {
-	g := game.NewGame(4)
+	g := game.NewGame(3)
+	// Check if the game is nil
+	if g == nil {
+		panic("invalid dimension")
+	}
 
 	for g.Winner() == game.Empty {
 		fmt.Println(g)
