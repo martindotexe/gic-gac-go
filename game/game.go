@@ -2,19 +2,23 @@ package game
 
 import "fmt"
 
-// Dimension defines the size of the tic-tac-toe board (Dimension x Dimension)
-const MetaBits = 3
+// Max dimension is 5x5 (5*5*2 = 50 bits) => 64 bits - 50 bits = 14 bits for metadata
+const MetaBits = 14
 
 type Game uint64
 
-// Example of the game board representation for a 3x3 board:
-// 0000000000000000000000000000000000000000000 00 00 00 00 00 00 00 00 00 00 00 0
-//                                                                           ^^ ^ MetaBits
-//                                                                              ^ Player turn (bit 0)
-//                                                                           ^^__ Dimension (bits 1-2)
-//                                                               ^^ ^^ ^^________ Row 1
-//                                                      ^^ ^^ ^^_________________ Row 2
-//                                             ^^ ^^ ^^__________________________ Row 3
+// Example of the game board representation for a 5x5 board:
+// +---------50 bits---------+---14 bits---+
+// | 00 00 00 00 00 00 00 00 | 0 0 0 0 0 0 |
+// +-------------------------+-------------+
+// | Rows & cols             | Meta data   |
+// +-------------------------+-------------+
+//
+// The first 50 bits are used to store the board cells (5x5 cells * 2 bits per cell = 50 bits)
+// The last 14 bits are used for metadata:
+// - Bit 0: Player turn (0 or 1)
+// - Bits 1-2: Dimension (2-5)
+// - Bits 3-14: Unused
 
 type Player uint8
 
