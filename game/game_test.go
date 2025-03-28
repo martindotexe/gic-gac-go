@@ -58,3 +58,46 @@ func TestGame(t *testing.T) {
 	_, err = g.Get(-1, 0)
 	require.Error(t, err)
 }
+
+func TestWinner(t *testing.T) {
+	g := NewGame()
+
+	// Ensure the game is not won
+	assert.Equal(t, Empty, g.Winner())
+
+	// Ensure the game is won by Player1
+	e1 := g.Set(0, 0, Player1)
+	e2 := g.Set(1, 0, Player1)
+	e3 := g.Set(2, 0, Player1)
+
+	assert.NoError(t, e1)
+	assert.NoError(t, e2)
+	assert.NoError(t, e3)
+	assert.Equal(t, Player1, g.Winner())
+
+	g = NewGame()
+
+	// Ensure the game is won by Player2
+
+	e1 = g.Set(0, 0, Player2)
+	e2 = g.Set(1, 1, Player2)
+	e3 = g.Set(2, 2, Player2)
+
+	assert.NoError(t, e1)
+	assert.NoError(t, e2)
+	assert.NoError(t, e3)
+	assert.Equal(t, Player2, g.Winner())
+
+	// Ensure the game is won by Player1
+
+	g = NewGame()
+
+	e1 = g.Set(0, 0, Player1)
+	e2 = g.Set(0, 1, Player1)
+	e3 = g.Set(0, 2, Player1)
+
+	assert.NoError(t, e1)
+	assert.NoError(t, e2)
+	assert.NoError(t, e3)
+	assert.Equal(t, Player1, g.Winner())
+}
