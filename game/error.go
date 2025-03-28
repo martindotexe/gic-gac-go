@@ -6,4 +6,5 @@ import (
 
 var (
 	InvalidCoordinate = errors.New("invalid coordinate")
+	InvalidMove       = errors.New("invalid move")
 )

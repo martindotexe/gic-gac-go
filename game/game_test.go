@@ -31,14 +31,9 @@ func TestGame(t *testing.T) {
 			require.NoError(t, err)
 			assert.Equal(t, Player1, p)
 
-			// Ensure that set overwrites the value
+			// Ensure that overwriting gives an error
 			err = g.Set(x, y, Player2)
-			require.NoError(t, err)
-
-			// Ensure the get method returns the correct value
-			p, err = g.Get(x, y)
-			require.NoError(t, err)
-			assert.Equal(t, Player2, p)
+			require.Error(t, err)
 		}
 	}
 	// Ensure the set method returns an error for invalid coordinates

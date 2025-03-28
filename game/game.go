@@ -42,9 +42,16 @@ func (g *Game) Get(x, y int) (Player, error) {
 	return Player((*g >> uint((x*3+y)*2)) & 3), nil
 }
 
+func (g *Game) validMove(x, y int) bool {
+	p, err := g.Get(x, y)
+	return err == nil && p == Empty
+}
+
 func (g *Game) Set(x, y int, p Player) error {
 	if 0 > x || x > 2 || 0 > y || y > 2 {
 		return InvalidCoordinate
+	} else if !g.validMove(x, y) {
+		return InvalidMove
 	}
 	*g = (*g &^ Game(3<<(uint(x*3+y)*2))) | Game(p)<<(uint(x*3+y)*2)
 	return nil
