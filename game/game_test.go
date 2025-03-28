@@ -14,6 +14,10 @@ func TestGame(t *testing.T) {
 	// Ensure the game is empty
 	assert.Equal(t, g, new(Game))
 
+	// Ensure String() returns the correct string
+	es := "   |   |   \n---+---+---\n   |   |   \n---+---+---\n   |   |   "
+	assert.Equal(t, es, g.String())
+
 	// Loop through all coordinates
 	for x := range 3 {
 		for y := range 3 {
@@ -36,6 +40,10 @@ func TestGame(t *testing.T) {
 			require.Error(t, err)
 		}
 	}
+
+	// Ensure String() returns the correct string
+	es = " X | X | X \n---+---+---\n X | X | X \n---+---+---\n X | X | X "
+	assert.Equal(t, es, g.String())
 	// Ensure the set method returns an error for invalid coordinates
 	err := g.Set(3, 0, Player1)
 	require.Error(t, err)
