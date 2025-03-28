@@ -9,10 +9,10 @@ import (
 
 func TestGame(t *testing.T) {
 	// Create a new game
-	g := NewGame()
+	g := NewGame(3)
 
 	// Ensure the game is empty
-	assert.Equal(t, g, new(Game))
+	assert.Equal(t, Game(2), *g)
 
 	// Ensure String() returns the correct string
 	es := "   |   |   \n---+---+---\n   |   |   \n---+---+---\n   |   |   "
@@ -60,7 +60,7 @@ func TestGame(t *testing.T) {
 }
 
 func TestWinner(t *testing.T) {
-	g := NewGame()
+	g := NewGame(3)
 
 	// Ensure the game is not won
 	assert.Equal(t, Empty, g.Winner())
@@ -75,7 +75,7 @@ func TestWinner(t *testing.T) {
 	assert.NoError(t, e3)
 	assert.Equal(t, Player1, g.Winner())
 
-	g = NewGame()
+	g = NewGame(3)
 
 	// Ensure the game is won by Player2
 
@@ -90,7 +90,7 @@ func TestWinner(t *testing.T) {
 
 	// Ensure the game is won by Player1
 
-	g = NewGame()
+	g = NewGame(3)
 
 	e1 = g.Set(0, 0, Player1)
 	e2 = g.Set(0, 1, Player1)

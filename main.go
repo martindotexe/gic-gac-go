@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	g := game.NewGame()
+	g := game.NewGame(4)
 
 	for g.Winner() == game.Empty {
 		fmt.Println(g)
@@ -22,5 +22,6 @@ func main() {
 		}
 		g.TogglePlayer()
 	}
+	fmt.Println(g)
 	fmt.Println(g.Winner(), "wins!")
 }
