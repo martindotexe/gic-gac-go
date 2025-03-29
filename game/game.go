@@ -1,6 +1,8 @@
 package game
 
-import "fmt"
+import (
+	"strings"
+)
 
 // Max dimension is 5x5 (5*5*2 = 50 bits) => 64 bits - 50 bits = 14 bits for metadata
 const MetaBits = 14
@@ -178,31 +180,45 @@ func (p Player) String() string {
 }
 
 func (g Game) String() string {
-	var s string
 	dim := g.GetDimension()
+	// Estimate capacity to avoid reallocations
+	// For a 3x3 board, we need roughly 80 bytes
+	// For larger boards, scale accordingly
+	capacity := dim * dim * 10
+
+	var sb strings.Builder
+	sb.Grow(capacity)
 
 	for i := 0; i < dim; i++ {
+		// Print cell values with dividers
 		for j := 0; j < dim; j++ {
 			p, _ := g.Get(j, i)
-			s += fmt.Sprintf(" %s ", p)
+			sb.WriteString(" ")
+			sb.WriteString(p.String())
+			sb.WriteString(" ")
+
 			if j < dim-1 {
-				s += "|"
+				sb.WriteString("|")
 			}
 		}
 		if i < dim-1 {
-			s += "\n"
+			sb.WriteString("\n")
 		}
+
+		// Print horizontal dividers
 		if i < dim-1 {
 			for j := 0; j < dim; j++ {
-				s += "---"
+				sb.WriteString("---")
+
 				if j < dim-1 {
-					s += "+"
+					sb.WriteString("+")
 				}
 			}
 			if i < dim-1 {
-				s += "\n"
+				sb.WriteString("\n")
 			}
 		}
 	}
-	return s
+
+	return sb.String()
 }
